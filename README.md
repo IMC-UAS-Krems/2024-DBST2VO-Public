@@ -121,22 +121,23 @@ Given a train connection instance (e.g., on a given date/time), registered users
 We make the following assumptions: 
 
 - there is always a place on the trains, so tickets can be always bought
-- the train seats are not numbered, so the system must handle only the number of passengers booked on a train and not each single seat.
-- The system grants only those seats that are effectively available at the moment of request; thus, overbooking on reserved seats is **not** possible.
-- Seats reservation can be done also after booking a ticket.
-- A user can only reserve one seat in each train at the given time.
+- the train seats are not numbered, so the system must handle only the number of passengers booked on a train and not each single seat
+- The system grants only those seats that are effectively available at the moment of request; thus, overbooking on reserved seats is **not** possible
+- Seats reservation **cannot** be done after booking a ticket
+- A user can only reserve one seat in each train at the given time
+- Reservations cannot be cancelled or refunded
  
 #### Access Purchase History
 
 Registered users can list the history of their past purchases, including the starting and ending stations, the day/time, total price, and **for each connection**, the price and whether they reserved a seat.
 
-The purchase history is always represented in descending starting time (at the top the most recent trips)
+The purchase history is always represented in descending starting time (at the top the most recent trips).
 
 ### Admin Features:
 
 Admin and only admin users can access the following special features:
 
-#### Add/update/remove users
+#### TRAITS User Management
 Admin can add/delete users. 
 
 Users are identified by their (unique) email address and might have other attributes.
@@ -148,15 +149,57 @@ Users are identified by their (unique) email address and might have other attrib
 
 To follow GDPR regulation, all the data about deleted users must be deleted as well, including all the seats reservations (seats might become free). If the user does not exist, no exception is raised!
 
+#### Train station management
+Admin users can add and connect train stations and can specify how long any train will take to travel between them.
+
+Train stations cannot be duplicated (raise ValueError).
+Any train station can be connected with any other train station except itself (so travel time cannot be zero!).
+The same two train station cannot be directly connected more than once.
+
+As long as train stations are connected, trains can travel between them in any direction.  
+
+Travel times must be at least one minute and cannot be more than one hour (raise ValueError otherwise).
+
+We assume that 
+- between connected stations there are as many tracks as needed, so trains can travel freely (no need to check if at a given time the tracks are occupied by another train)
+- any station has as many platforms as necessary (size does not matter)
+
 #### Add/update/remove trains
-Admin can add, update, or delete trains. Updating a train can change their size (how many seats are available) and their status, i.e., operational vs non operational.
+Admin can add, update, or delete trains.
+
+Updating a train can change their size (how many seats are available) and their status. The modification of the train has immediate effect, but we assume that a train capacity cannot be reduced.
+
+Admin can only toggle train status, i.e., trains can only be either operational or nonoperational. When a train change its status, its schedule(s) are affected.
+
 Deleting a train should ensure consistency!
-Reservations are cancelled, schedules/trips are cancelled, etc.
+(Future) reservations are cancelled, schedules/trips are cancelled, etc. However, deleting a train must not change the purchase history of users.
 
-#### Add/update/remove schedules
-Admin users can also add, update, delete train schedules. A train schedule associates a train with stations (stops) and their estimated time. 
+#### Train Scheduling
+Admin users can also add train schedules. A train schedule associates a train with a list of stations (stops) and their estimated waiting time (the train must stop at that station for the given waiting time).
 
-A train might be delayed or cancelled, therefore affecting its schedule.
+We assume that a train is never delayed but it can be non-operational for some time (max three hours in a day). If a train is non-operational, its current and future schedules (in the same day) must be updated with by adding a delay.
+
+The delay is computed as the difference between the time the train became non-operational and "now". The delay is rounded to the (next) minute.
+
+We assume that:
+
+- schedules are daily (all the week day they are the same)
+- schedules have validity (from a starting day to an ending day)
+- at the end of each day, any problem is (automatically) resolved; thus, no delay affects the schedules of the next days
+
+Scheduling trains must be physically feasible and follows these ground rules:
+
+- A train cannot be in two places at the same time!
+- A train cannot teleport:
+    - trains cannot travel faster than the tracks/link allow/s
+    - trains can travel only passing by directly connected stations
+    - trains always stop at all stations, i.e., they cannot pass throughout a station without stopping
+    - A train stopping in one station cannot restart from another one
+
+- A train must stop at end station(s) for at least 10 minutes before resuming operations (e.g., waiting time cannot be less than 10 minutes there)
+- To allow night operations, the last stop of the train in a day must be at least six hours before the first start of the train in the next day. Consequently, a schedule must always end in the same day it is started
+
+> NOTE: schedules are affected by train availability: if a train is deleted, the schedule is not possible. 
 
 ## Additional methods
 
