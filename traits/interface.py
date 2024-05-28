@@ -51,7 +51,7 @@ class TraitsInterface(ABC):
         """
 
     @abstractmethod
-    def get_purchase_hystory(user_email):
+    def get_purchase_history(user_email):
         """
         Access Purchase History
 
