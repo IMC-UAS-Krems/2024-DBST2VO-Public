@@ -22,6 +22,7 @@ class TrainStatus(Enum):
     DELAYED = 1,
     BROKEN = 2
 
+
 class SortingCriteria(Enum):
     OVERALL_TRAVEL_TIME = 0,
     NUMBER_OF_TRAIN_CHANGES = 1,
@@ -34,12 +35,16 @@ class TraitsInterface(ABC):
     This is the reference (abstract) class that defines the main admin features.
     """
 
+    @abstractmethod
+    def __init__(self, rdbms_connection, rdbms_admin_connection, neo4j_driver) -> None:
+        pass
+
     ########################################################################
     # Basic Features
     ########################################################################
 
     @abstractmethod
-    def search_connections(starting_station_key: TraitsKey, ending_station_key: TraitsKey,
+    def search_connections(self, starting_station_key: TraitsKey, ending_station_key: TraitsKey,
                            travel_time_day: int = None, travel_time_month : int = None, travel_time_year : int = None,
                            is_departure_time=True,
                            sort_by : SortingCriteria = SortingCriteria.OVERALL_TRAVEL_TIME, is_ascending : bool =True,
@@ -55,7 +60,7 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def get_train_current_status(train_key: TraitsKey) -> Optional[TrainStatus]:
+    def get_train_current_status(self, train_key: TraitsKey) -> Optional[TrainStatus]:
         """
         Check the status of a train. If the train does not exist returns None
         """
@@ -66,7 +71,7 @@ class TraitsInterface(ABC):
     ########################################################################
 
     @abstractmethod
-    def buy_ticket(user_email: str, connection, also_reserve_seats=True):
+    def buy_ticket(self, user_email: str, connection, also_reserve_seats=True):
         """
         Given a train connection instance (e.g., on a given date/time), registered users can book tickets and optionally reserve seats. When the user decides to reserve seats, the system will try to reserve all the available seats automatically.
         We make the following assumptions:
@@ -80,7 +85,7 @@ class TraitsInterface(ABC):
         """
 
     @abstractmethod
-    def get_purchase_history(user_email: str) -> List:
+    def get_purchase_history(self, user_email: str) -> List:
         """
         Access Purchase History
 
@@ -98,7 +103,7 @@ class TraitsInterface(ABC):
 
     # Add and remove users
     @abstractmethod
-    def add_user(user_email: str, user_details) -> None:
+    def add_user(self, user_email: str, user_details) -> None:
         """
         Add a new user to the system with given email and details.
         Email format: <Recipient name>@<Domain name><top-level domain>
@@ -110,7 +115,7 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_user(user_email: str) -> None:
+    def delete_user(self, user_email: str) -> None:
         """
         Delete the user from the db if the user exists.
         The method should also delete any data related to the user (past/future tickets and seat reservations)
@@ -120,7 +125,7 @@ class TraitsInterface(ABC):
     # Deleting a train should ensure consistency! Reservations are cancelled, schedules/trips are cancelled, etc.
 
     @abstractmethod
-    def add_train(train_key: TraitsKey, train_capacity: int, train_status: TrainStatus) -> None:
+    def add_train(self, train_key: TraitsKey, train_capacity: int, train_status: TrainStatus) -> None:
         """
         Add new trains to the system with given code.
 
@@ -129,21 +134,21 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def update_train_details(train_key: TraitsKey, train_capacity: Optional[int] = None, train_status: Optional[TrainStatus] = None) -> None:
+    def update_train_details(self, train_key: TraitsKey, train_capacity: Optional[int] = None, train_status: Optional[TrainStatus] = None) -> None:
         """
         Update the details of existing train if specified (i.e., not None), otherwise do nothing.
         """
         pass
 
     @abstractmethod
-    def delete_train(train_key: TraitsKey) -> None:
+    def delete_train(self, train_key: TraitsKey) -> None:
         """
         Drop the train from the system. Note that all its schedules, reservations, etc. must be also dropped.
         """
         pass
 
     @abstractmethod
-    def add_train_station(train_station_key: TraitsKey, train_station_details) -> None:
+    def add_train_station(self, train_station_key: TraitsKey, train_station_details) -> None:
         """
         Add a train station
         Duplicated are not allowed, raise ValueError
@@ -151,7 +156,7 @@ class TraitsInterface(ABC):
         pass
     
     @abstractmethod
-    def connect_train_stations(starting_train_station_key: TraitsKey, ending_train_station_key: TraitsKey, travel_time_in_minutes: int)  -> None:
+    def connect_train_stations(self, starting_train_station_key: TraitsKey, ending_train_station_key: TraitsKey, travel_time_in_minutes: int)  -> None:
         """
         Connect to train station so trains can travel on them
         Raise ValueError if any of the stations does not exist
@@ -160,7 +165,7 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def add_schedule(train_key: TraitsKey,
+    def add_schedule(self, train_key: TraitsKey,
                      starting_hours_24_h: int, starting_minutes: int,
                      stops: List[Tuple[TraitsKey, int]], # [station_key, waiting_time]
                      valid_from_day: int, valid_from_month: int, valid_from_year: int,

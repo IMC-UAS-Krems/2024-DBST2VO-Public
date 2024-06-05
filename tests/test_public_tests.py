@@ -17,9 +17,9 @@ def test_search_connections():
      Returns an empty list if no connections are possible
      Raise a ValueError in case of errors and if the starting or ending stations are the same
      """
-     
+     rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
      # TODO How to instantiate this one? Should this be provided via a Fixture?
-     t = Traits()
+     t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
      starting_station_key = TraitsKey("1")
      ending_station_key = TraitsKey("2") 
      no_connections = t.search_connections(starting_station_key, ending_station_key,
@@ -35,7 +35,8 @@ def test_get_train_current_status():
     The user should be able to check the status of a train/connection: is the train operational? is delayed? etc.
 
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     train_key = TraitsKey("1")
 
     train_status = t.get_train_current_status(train_key)
@@ -57,8 +58,8 @@ def test_buy_ticket():
         - A user can only reserve one seat in each train at the given time.
     If the user does not exist, the method must raise a ValueError
     """
-
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     
     user_email = "user@email.org"
     connection = None # TODO What's here?
@@ -77,7 +78,8 @@ def test_get_purchase_history():
      
      If the user is not registered, the list is empty
      """
-     t = Traits()
+     rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+     t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
      user_email = "user@email.org"
      empty_history = t.get_purchase_history(user_email)
 
@@ -97,7 +99,8 @@ def test_do_not_add_user_with_invalid_email():
     Raise a ValueError if the email has invalid format.
     Raise a ValueError if the user already exists
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     invalid_user_email = "this is not a valid email address"
     user_details = None
     with pytest.raises(ValueError) as exc_info:
@@ -113,7 +116,8 @@ def test_do_not_add_duplicated_user():
     Raise a ValueError if the email has invalid format.
     Raise a ValueError if the user already exists
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     user_email = "user@email.org"
     user_details = None
     t.add_user(user_email, user_details)
@@ -126,7 +130,8 @@ def test_delete_user():
     Delete the user from the db if the user exists.
     The method should also delete any data related to the user (past/future tickets and seat reservations)
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     user_email = "user@email.org"
     user_details = None
     t.add_user(user_email, user_details)
@@ -146,7 +151,8 @@ def test_canont_add_duplicated_train():
 
     Raise a ValueError if the train already exists
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     train_key = TraitsKey(1)
     train_capacity = 100
     is_operational = True
@@ -157,20 +163,21 @@ def test_canont_add_duplicated_train():
         t.add_train(train_key, train_capacity, is_operational)
 
 
-def test_update_train_details(train_key, train_capacity=None, is_operational=None):
+def test_update_train_details():
     """
     Update the details of existing trains, otherwise do nothing
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     
     train_key = TraitsKey(1)
     train_capacity = 100
     
     t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL)
-    current_status = t.get_train_current_status()
+    current_status = t.get_train_current_status(train_key)
     
     t.update_train_details(train_key, train_status=TrainStatus.DELAYED)
-    updated_status = t.get_train_current_status()
+    updated_status = t.get_train_current_status(train_key)
     assert updated_status != current_status, f"wrong train updated status {updated_status}"
 
 def test_delete_train():
@@ -178,7 +185,8 @@ def test_delete_train():
     Drop the train from the system.
     Note that all its schedules, reservations, etc. must be also dropped.
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     
     train_key = TraitsKey(1)
     t.delete_train(train_key)
@@ -190,11 +198,13 @@ def test_do_not_add_duplicated_train_station():
     Add a train station
     Duplicated are not allowed, raise ValueError
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     train_station_key = TraitsKey(0)
-    t.add_train_station(train_station_key)
+    train_station_details = None
+    t.add_train_station(train_station_key, train_station_details)
     with pytest.raises(ValueError) as exc_info:
-        t.add_train_station(train_station_key)
+        t.add_train_station(train_station_key, train_station_details)
 
 def test_do_not_connect_train_stations_that_do_not_exist():
     """
@@ -202,7 +212,8 @@ def test_do_not_connect_train_stations_that_do_not_exist():
     Raise ValueError if any of the stations does not exist
     Raise ValueError for invalid travel_times
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     starting_train_station_key = TraitsKey(0)
     ending_train_station_key = TraitsKey("2") 
     travel_time = 5 # minutes
@@ -215,7 +226,8 @@ def test_do_not_connect_train_stations_with_wrong_time():
     Raise ValueError if any of the stations does not exist
     Raise ValueError for invalid travel_times
     """
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     starting_train_station_key = TraitsKey(0)
     ending_train_station_key = TraitsKey(1)
     travel_time = 0 # Impossible time!
@@ -232,8 +244,8 @@ def test_add_schedule():
     Validity dates must ensure that valid_from is in the past w.r.t. valid_until
     In case of error, raise ValueError
     """
-
-    t = Traits()
+    rdbms_connection, rdbms_admin_connection, neo4j_driver = None, None, None
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_driver)
     # Add two stations
     starting_train_station_key = TraitsKey(1)
     ending_train_station_key = TraitsKey("2") # Not a typo !
@@ -242,7 +254,7 @@ def test_add_schedule():
     t.connect_train_stations(starting_train_station_key, ending_train_station_key, travel_time)
     # Add a train
     train_key = None
-    t.add_train(train_key)
+    t.add_train(train_key, train_capacity=100, train_status=TrainStatus.OPERATIONAL)
     # Stops
     stops = []
     stops.append( (starting_train_station_key, 5) )
