@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Optional
+from enum import Enum
 
 class TraitsKey():
     """
@@ -15,6 +16,19 @@ class TraitsKey():
     def to_int(self) -> int:
         return int(self.id)
 
+
+class TrainStatus(Enum):
+    OPERATIONAL = 0,
+    DELAYED = 1,
+    BROKEN = 2
+
+class SortingCriteria(Enum):
+    OVERALL_TRAVEL_TIME = 0,
+    NUMBER_OF_TRAIN_CHANGES = 1,
+    OVERALL_WAITING_TIME = 2,
+    ESTIMATED_PRICE = 3
+
+
 class TraitsInterface(ABC):
     """
     This is the reference (abstract) class that defines the main admin features.
@@ -26,12 +40,13 @@ class TraitsInterface(ABC):
 
     @abstractmethod
     def search_connections(starting_station_key: TraitsKey, ending_station_key: TraitsKey,
-                           travel_time_day=None, travel_time_month=None, travel_time_year=None, is_departure_time=True,
-                           sort_by="ott", is_ascending=True,
-                           limit=5) -> List:
+                           travel_time_day: int = None, travel_time_month : int = None, travel_time_year : int = None,
+                           is_departure_time=True,
+                           sort_by : SortingCriteria = SortingCriteria.OVERAL_TRAVEL_TIME, is_ascending : bool =True,
+                           limit : int = 5) -> List:
         """
         Search Train Connections (between two stations).
-        Sorting criteria can be one of the following:overall travel time (ott), number of train changes (nc), waiting time (wt), and estimated price (ep)
+        Sorting criteria can be one of the following:overall travel time, number of train changes, waiting time, and estimated price
 
         Return the connections from a starting and ending stations, possibly including changes at interchanging stations.
         Returns an empty list if no connections are possible
@@ -40,10 +55,9 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def get_train_current_status(train_key: TraitsKey) -> Optional[str]:
+    def get_train_current_status(train_key: TraitsKey) -> Optional[TrainStatus]:
         """
-        Check the status of a train
-        The user should be able to check the status of a train/connection: is the train operational? is delayed? etc.
+        Check the status of a train. If the train does not exist returns None
         """
         pass
 
@@ -66,7 +80,7 @@ class TraitsInterface(ABC):
         """
 
     @abstractmethod
-    def get_purchase_history(user_email):
+    def get_purchase_history(user_email: str) -> List:
         """
         Access Purchase History
 
@@ -84,7 +98,7 @@ class TraitsInterface(ABC):
 
     # Add and remove users
     @abstractmethod
-    def add_user(user_email: str, user_details):
+    def add_user(user_email: str, user_details) -> None:
         """
         Add a new user to the system with given email and details.
         Email format: <Recipient name>@<Domain name><top-level domain>
@@ -96,7 +110,7 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_user(user_email: str):
+    def delete_user(user_email: str) -> None:
         """
         Delete the user from the db if the user exists.
         The method should also delete any data related to the user (past/future tickets and seat reservations)
@@ -106,7 +120,7 @@ class TraitsInterface(ABC):
     # Deleting a train should ensure consistency! Reservations are cancelled, schedules/trips are cancelled, etc.
 
     @abstractmethod
-    def add_train(train_key: TraitsKey, train_capacity: int, is_operational: bool):
+    def add_train(train_key: TraitsKey, train_capacity: int, train_status: TrainStatus) -> None:
         """
         Add new trains to the system with given code.
 
@@ -115,21 +129,21 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def update_train_details(train_key: TraitsKey, train_capacity: Optional[int] = None, is_operational: Optional[bool] = None):
+    def update_train_details(train_key: TraitsKey, train_capacity: Optional[int] = None, train_status: Optional[TrainStatus] = None) -> None:
         """
-        Update the details of existing trains, otherwise do nothing
+        Update the details of existing train if specified (i.e., not None), otherwise do nothing.
         """
         pass
 
     @abstractmethod
-    def delete_train(train_key: TraitsKey):
+    def delete_train(train_key: TraitsKey) -> None:
         """
         Drop the train from the system. Note that all its schedules, reservations, etc. must be also dropped.
         """
         pass
 
     @abstractmethod
-    def add_train_station(train_station_key: TraitsKey):
+    def add_train_station(train_station_key: TraitsKey, train_station_details) -> None:
         """
         Add a train station
         Duplicated are not allowed, raise ValueError
@@ -137,7 +151,7 @@ class TraitsInterface(ABC):
         pass
     
     @abstractmethod
-    def connect_train_stations(starting_train_station_key: TraitsKey, ending_train_station_key: TraitsKey, travel_time_in_minutes: int):
+    def connect_train_stations(starting_train_station_key: TraitsKey, ending_train_station_key: TraitsKey, travel_time_in_minutes: int)  -> None:
         """
         Connect to train station so trains can travel on them
         Raise ValueError if any of the stations does not exist
@@ -150,21 +164,14 @@ class TraitsInterface(ABC):
                      starting_hours_24_h: int, starting_minutes: int,
                      stops: List[Tuple[TraitsKey, int]], # [station_key, waiting_time]
                      valid_from_day: int, valid_from_month: int, valid_from_year: int,
-                     valid_until_day: int, valid_until_month: int, valid_until_year: int):
+                     valid_until_day: int, valid_until_month: int, valid_until_year: int) -> None:
         """
         Create a schedule for a give train.
         The schedule must have at least two stops, cannot connect the same station directly but can create "rings"
         Stops must correspond to existing stations
-        Consecutive stops must be connected.
+        Consecutive stops must be connected stations.
+        starting hours and minutes defines when this schedule is active
         Validity dates must ensure that valid_from is in the past w.r.t. valid_until
         In case of error, raise ValueError
         """
-
         pass
-
-
-
-
-
-
-

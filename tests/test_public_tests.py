@@ -1,7 +1,6 @@
 # Import your implementation in the public tests
 from traits.implementation import Traits
-from public.traits.interface import TraitsKey
-
+from public.traits.interface import TraitsKey, TrainStatus, SortingCriteria
 import pytest
 
 @pytest.mark.skip(reason="This test was only illustrative")
@@ -25,7 +24,7 @@ def test_search_connections():
      ending_station_key = TraitsKey("2") 
      no_connections = t.search_connections(starting_station_key, ending_station_key,
                            travel_time_day=None, travel_time_month=None, travel_time_year=None, is_departure_time=True,
-                           sort_by="ott", is_ascending=True,
+                           sort_by=SortingCriteria.OVERALL_TRAVEL_TIME, is_ascending=True,
                            limit=5)
      
      assert len(no_connections) == 0, "Wrong number of connections returned"
@@ -166,10 +165,11 @@ def test_update_train_details(train_key, train_capacity=None, is_operational=Non
     
     train_key = TraitsKey(1)
     train_capacity = 100
-    t.add_train(train_key, train_capacity, is_operational=True)
+    
+    t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL)
     current_status = t.get_train_current_status()
     
-    t.update_train_details(train_key, is_operational=False)
+    t.update_train_details(train_key, train_status=TrainStatus.DELAYED)
     updated_status = t.get_train_current_status()
     assert updated_status != current_status, f"wrong train updated status {updated_status}"
 
@@ -250,8 +250,8 @@ def test_add_schedule():
     # Valid from 1 jan to 31 dec 2024
     valid_from_day, valid_from_month, valid_from_year = 1, 1, 2024
     valid_until_day, valid_until_month, valid_until_year = 31, 12, 2024
-    starting_hours_24_h = 8
-    starting_minutes = 0
+    starting_hours_24_h, starting_minutes = 8, 0
+
     t.add_schedule(
                 train_key,
                 starting_hours_24_h, starting_minutes,
