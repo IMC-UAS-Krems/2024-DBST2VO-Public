@@ -125,7 +125,7 @@ We make the following assumptions:
 - The system grants only those seats that are effectively available at the moment of request; thus, overbooking on reserved seats is **not** possible
 - Seats reservation **cannot** be done after booking a ticket
 - A user can only reserve one seat in each train at the given time
-- Reservations cannot be cancelled or refunded
+- You do not have to implement a method to cancel reservations or provide refund
  
 #### Access Purchase History
 
