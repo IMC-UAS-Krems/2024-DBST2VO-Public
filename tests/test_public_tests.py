@@ -70,7 +70,7 @@ def test_buy_ticket():
     # TODO How to assert? using history?
 
 
-def test_get_purchase_hystory():
+def test_get_purchase_history():
      """
      Access Purchase History
      Registered users can list the history of their past purchases, including the starting and ending stations, the day/time, total price, and for each connection, the price and whether they reserved a seat
@@ -80,7 +80,7 @@ def test_get_purchase_hystory():
      """
      t = Traits()
      user_email = "user@email.org"
-     empty_history = t.get_purchase_hystory(user_email)
+     empty_history = t.get_purchase_history(user_email)
 
      assert len(empty_history) == 0, "Wrong history returned for non registered user"
 
@@ -134,9 +134,9 @@ def test_delete_user():
     # Make the user buy something
     # Check the user history not empty
     # TODO Probably we should add a get_user method?
-    t.get_purchase_hystory(user_email)
+    t.get_purchase_history(user_email)
     t.delete_user(user_email)
-    empty_history = t.get_purchase_hystory(user_email)
+    empty_history = t.get_purchase_history(user_email)
     assert len(empty_history) == 0
 
 # Deleting a train should ensure consistency! Reservations are cancelled, schedules/trips are cancelled, etc.
