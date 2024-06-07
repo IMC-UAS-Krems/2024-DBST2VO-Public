@@ -6,9 +6,11 @@ from enum import Enum
 
 # The name of the base user of traits database
 BASE_USER_NAME = "traits"
-
+BASE_USER_PASS = "traits-pass"
 # The name of the admin user of traits database
-ADMIN_USER_NAME = "admin"
+ADMIN_USER_NAME = "traits-admin"
+ADMIN_USER_PASS = "traits-admin-pass"
+
 
 class TraitsKey():
     """
@@ -49,7 +51,7 @@ class TraitsUtilityInterface(ABC):
         pass
 
     @abstractmethod
-    def generate_sql_initialization_code(self) -> List[str]:
+    def generate_sql_initialization_code() -> List[str]:
         """
         Returns a list of string each one containing a SQL statment to setup the database. 
         This list resembles the SQL instructions that you can get when dumping a database.
