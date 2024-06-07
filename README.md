@@ -99,7 +99,13 @@ The number of train changes is the count of how many times the user must change 
 
 The waiting time is the time the user spends waiting for a train, including the time spent waiting for the first train.
 
-The estimated price is the overall (fixed) cost of the travel, which depends on the type of train used in each connection, and the (variable) cost for seat reservation, which depends on the actual seats reserved.
+The estimated price is the overall (fixed) cost of the travel, which depends on the travel distance/time (`travel_price = travel time / 2`), and the (variable) cost for seat reservation, which depends on how many seats should be reserved (`reservation_price=number of trains * 2`).
+
+For example, if the user travels with Train 1 from A to B to C and then boards Train 2 to reach D, the estimated price for the ticket plus reservations is:
+- ```travel_price = [ tt(A,B) + tt(B,C) + tt(C,D) ] / 2```, where tt is the travel time from two stations (without counting the waiting time at each station or any delay)
+- ```reservation_price = 2 * 2```
+
+> Note: the actual price might be different if some seats cannot be reserved due to high demand
 
 Sorting can be `ascending` or `descending`.
 By default, i.e., when not explicitly specified, the sorting criteria is `overall travel time ascending` (so, the system must report the fastest connections first).
