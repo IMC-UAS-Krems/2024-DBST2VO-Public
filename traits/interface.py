@@ -1,6 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from enum import Enum
+
+# Global Constants
+
+# The name of the base user of traits database
+BASE_USER_NAME = "traits"
+
+# The name of the admin user of traits database
+ADMIN_USER_NAME = "admin"
 
 class TraitsKey():
     """
@@ -28,6 +36,44 @@ class SortingCriteria(Enum):
     NUMBER_OF_TRAIN_CHANGES = 1,
     OVERALL_WAITING_TIME = 2,
     ESTIMATED_PRICE = 3
+
+class TraitsUtilityInterface(ABC):
+    """
+    This is the reference (abstract) class defining utility methods like CRUD operations on basic entities, 
+    and database initialization. NOTE: You can define more methods in your implementation to support your own
+    tests
+    """
+
+    @abstractmethod
+    def __init__(self, rdbms_connection, rdbms_admin_connection, neo4j_driver) -> None:
+        pass
+
+    @abstractmethod
+    def generate_sql_initialization_code(self) -> List[str]:
+        """
+        Returns a list of string each one containing a SQL statment to setup the database. 
+        This list resembles the SQL instructions that you can get when dumping a database.
+        For instance, it will contains table definitions (CREATE TABLE), setup of the users
+        BASE_USER_NAME and ADMIN_USER_NAME
+
+        These instructions will be used to setup the MariaDB database before each and every test
+        """
+        pass
+
+    @abstractmethod
+    def get_all_users(self) -> List:
+        """
+        Return all the users stored in the database
+        """
+        pass
+
+
+    @abstractmethod
+    def get_all_schedules(self) -> List:
+        """
+        Return all the schedules stored in the database
+        """
+        pass
 
 
 class TraitsInterface(ABC):
