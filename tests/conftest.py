@@ -3,8 +3,10 @@ from pytest_mysql import factories
 from contextlib import contextmanager
 from neo4j import GraphDatabase
 from pytest_mysql.executor_noop import NoopMySQLExecutor
+from traits.implementation import TraitsUtility
 
-from solution.database import generate_sql_initialization_code
+# Default configurations
+from public.traits.interface import BASE_USER_NAME, BASE_USER_PASS, ADMIN_USER_NAME, ADMIN_USER_PASS
 
 ################################################################################
 # MariaDB fixtures
@@ -54,13 +56,13 @@ def mariadb_database():
 def mariadb(root_connection):
     """
     This fixture creates a Maria DB called "test" and initializes it with the YOUR code inside the
-    Utils.generate_sql_initialization_code. This code should create the tables and the users (traits and admin)
+    TraitsUtility.generate_sql_initialization_code. This code should create the tables and the users (traits and admin)
     with the right permissions
     """
 
     cur = root_connection.cursor()
     cur.execute("BEGIN;")
-    for sql_statement in generate_sql_initialization_code():
+    for sql_statement in TraitsUtility.generate_sql_initialization_code():
         cur.execute(sql_statement)
     cur.execute("COMMIT;")
 
@@ -68,11 +70,10 @@ def mariadb(root_connection):
 
 
 @pytest.fixture
-def connection_factory(mariadb_host, mariadb_port, mariadb_database):
+def connection_factory(mariadb, mariadb_host, mariadb_port, mariadb_database):
     """ 
     This code retuns an object that can create connections to a database given user and password
     """
-
     @contextmanager
     def _gen_connection(user, password):
         """ Generate a connection to the database """
@@ -107,14 +108,15 @@ def connection_factory(mariadb_host, mariadb_port, mariadb_database):
 
     yield _gen_connection
 
-@pytest.fixture
-def rdbms_connection(connection_factory):
-    with connection_factory("traits", "traits-pass") as connection:
-       yield connection
 
 @pytest.fixture
 def rdbms_connection(connection_factory):
-    with connection_factory("admin", "traits-admin-pass") as connection:
+    with connection_factory(BASE_USER_NAME, BASE_USER_PASS) as connection:
+       yield connection
+
+@pytest.fixture
+def rdbms_admin_connection(connection_factory):
+    with connection_factory(ADMIN_USER_NAME, ADMIN_USER_PASS) as connection:
        yield connection
        
 ################################################################################
