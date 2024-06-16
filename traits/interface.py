@@ -28,15 +28,15 @@ class TraitsKey():
 
 
 class TrainStatus(Enum):
-    OPERATIONAL = 0,
-    DELAYED = 1,
+    OPERATIONAL = 0
+    DELAYED = 1
     BROKEN = 2
 
 
 class SortingCriteria(Enum):
-    OVERALL_TRAVEL_TIME = 0,
-    NUMBER_OF_TRAIN_CHANGES = 1,
-    OVERALL_WAITING_TIME = 2,
+    OVERALL_TRAVEL_TIME = 0
+    NUMBER_OF_TRAIN_CHANGES = 1
+    OVERALL_WAITING_TIME = 2
     ESTIMATED_PRICE = 3
 
 class TraitsUtilityInterface(ABC):
