@@ -131,6 +131,8 @@ class TraitsInterface(ABC):
 
         If the user does not exist, the method must raise a ValueError
         """
+        pass
+        
 
     @abstractmethod
     def get_purchase_history(self, user_email: str) -> List:
