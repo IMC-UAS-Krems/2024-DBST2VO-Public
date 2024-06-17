@@ -107,16 +107,46 @@ def test_do_not_add_duplicated_user(rdbms_connection, rdbms_admin_connection, ne
         t.add_user(user_email, user_details)
 
 
-def test_delete_user(rdbms_connection, rdbms_admin_connection, neo4j_db):
+def test_delete_user_from_an_empty_db(rdbms_connection, rdbms_admin_connection, neo4j_db):
     t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_db)
     user_email = "user@email.org"
     user_details = None
+    # Skip the test if the DB is NOT empty
+    if len(utils.get_all_users()) == 0:
+        pytest.skip("Skip this test because the DB is NOT empty !")
+
     t.add_user(user_email, user_details)
     utils = TraitsUtility(rdbms_connection, rdbms_admin_connection, neo4j_db)
     assert len(utils.get_all_users()) == 1, f"User {user_email} not inserted"
     # Delete the user
     t.delete_user(user_email)
     assert len(utils.get_all_users()) == 0, f"User {user_email} not correctly removed"
+
+
+def test_delete_user_from_an_full_db(rdbms_connection, rdbms_admin_connection, neo4j_db):
+    t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_db)
+    utils = TraitsUtility(rdbms_connection, rdbms_admin_connection, neo4j_db)
+    
+    # Get the number of currently registered users
+    currently_registerd_users = len(utils.get_all_users())
+
+    # Generate a random user to reduce flakiness.
+    import random
+    from datetime import datetime
+    random.seed(datetime.now().timestamp())
+    salt = random.randint(1, 50000)
+    user_email = f"user_{salt}_@email.org"
+    user_details = None
+
+    # Add the random user
+    t.add_user(user_email, user_details)
+
+    # Check if the number of users increased
+    assert len(utils.get_all_users()) == currently_registerd_users + 1, f"User {user_email} not inserted"
+
+    # Finally delete the user
+    t.delete_user(user_email)
+    assert len(utils.get_all_users()) == currently_registerd_users, f"User {user_email} not correctly removed"
 
 
 def test_cannot_add_duplicated_train(rdbms_connection, rdbms_admin_connection, neo4j_db):
