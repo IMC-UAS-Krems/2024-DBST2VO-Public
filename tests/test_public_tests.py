@@ -123,12 +123,11 @@ def test_cannot_add_duplicated_train(rdbms_connection, rdbms_admin_connection, n
     t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_db)
     train_key = TraitsKey(1)
     train_capacity = 100
-    train_status =
-    t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL))
+    t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL)
     with pytest.raises(ValueError) as exc_info:
         train_capacity = 10
         is_operational = False
-        t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL))
+        t.add_train(train_key, train_capacity, train_status=TrainStatus.OPERATIONAL)
 
 
 def test_update_train_details(rdbms_connection, rdbms_admin_connection, neo4j_db):
