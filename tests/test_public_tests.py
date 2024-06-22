@@ -109,6 +109,8 @@ def test_do_not_add_duplicated_user(rdbms_connection, rdbms_admin_connection, ne
 
 def test_delete_user_from_an_empty_db(rdbms_connection, rdbms_admin_connection, neo4j_db):
     t = Traits(rdbms_connection, rdbms_admin_connection, neo4j_db)
+    utils = TraitsUtility(rdbms_connection, rdbms_admin_connection, neo4j_db)
+    
     user_email = "user@email.org"
     user_details = None
     # Skip the test if the DB is NOT empty
