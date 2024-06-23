@@ -114,7 +114,7 @@ def test_delete_user_from_an_empty_db(rdbms_connection, rdbms_admin_connection, 
     user_email = "user@email.org"
     user_details = None
     # Skip the test if the DB is NOT empty
-    if len(utils.get_all_users()) == 0:
+    if len(utils.get_all_users()) != 0:
         pytest.skip("Skip this test because the DB is NOT empty !")
 
     t.add_user(user_email, user_details)
