@@ -229,7 +229,8 @@ def test_simple_add_schedule(rdbms_connection, rdbms_admin_connection, neo4j_db)
     
     # Add a train
     train_key = None
-    t.add_train(train_key, train_capacity=100, train_status=TrainStatus.OPERATIONAL)
+    # Fixed: Return the key assigned by add_train to the newly inserted train
+    train_key = t.add_train(train_key, train_capacity=100, train_status=TrainStatus.OPERATIONAL)
     # Stops
     stops = []
     # The train waits 5 minutes at first station
@@ -271,7 +272,8 @@ def test_do_not_add_schedule_if_stops_are_not_connected(rdbms_connection, rdbms_
     
     # Add a train
     train_key = None
-    t.add_train(train_key, train_capacity=100, train_status=TrainStatus.OPERATIONAL)
+    # Fixed: Return the key assigned by add_train to the newly inserted train
+    train_key = t.add_train(train_key, train_capacity=100, train_status=TrainStatus.OPERATIONAL)
 
     # Stops
     stops = []
