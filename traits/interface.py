@@ -175,9 +175,9 @@ class TraitsInterface(ABC):
     # Deleting a train should ensure consistency! Reservations are cancelled, schedules/trips are cancelled, etc.
 
     @abstractmethod
-    def add_train(self, train_key: TraitsKey, train_capacity: int, train_status: TrainStatus) -> None:
+    def add_train(self, train_key: TraitsKey, train_capacity: int, train_status: TrainStatus) -> TraitsKey:
         """
-        Add new trains to the system with given code.
+        Add new trains to the system with given code and returns the TraitsKey of the added train.
 
         Raise a ValueError if the train already exists
         """
@@ -198,9 +198,9 @@ class TraitsInterface(ABC):
         pass
 
     @abstractmethod
-    def add_train_station(self, train_station_key: TraitsKey, train_station_details) -> None:
+    def add_train_station(self, train_station_key: TraitsKey, train_station_details) -> TraitsKey:
         """
-        Add a train station
+        Add a train station and return the TraitsKey of the added train station.
         Duplicated are not allowed, raise ValueError
         """
         pass
