@@ -94,6 +94,7 @@ class TraitsInterface(ABC):
     @abstractmethod
     def search_connections(self, starting_station_key: TraitsKey, ending_station_key: TraitsKey,
                            travel_time_day: int = None, travel_time_month : int = None, travel_time_year : int = None,
+                           travel_time_hour: int = None, travel_time_minute: int = None,
                            is_departure_time=True,
                            sort_by : SortingCriteria = SortingCriteria.OVERALL_TRAVEL_TIME, is_ascending : bool =True,
                            limit : int = 5) -> List:
