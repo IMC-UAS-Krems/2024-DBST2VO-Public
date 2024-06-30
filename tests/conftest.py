@@ -88,6 +88,7 @@ def connection_factory(mariadb, mariadb_host, mariadb_port, mariadb_database):
                                              user=user,
                                              port=mariadb_port,
                                              password=password)
+        cursor = None
         try:
             if connection.is_connected():
                 db_Info = connection.get_server_info()
@@ -102,8 +103,9 @@ def connection_factory(mariadb, mariadb_host, mariadb_port, mariadb_database):
         except Error as e:
             print("Error while connecting to MySQL", e)
         finally:
-            if connection.is_connected():
-                cursor.close()
+            if connection is not None and connection.is_connected():
+                if cursor is not None:
+                    cursor.close()
                 connection.close()
 
     yield _gen_connection
